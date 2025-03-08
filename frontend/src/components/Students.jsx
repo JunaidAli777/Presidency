@@ -15,6 +15,7 @@ const Students = () => {
   const [ students, setStudents ] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [ isToken, setIsToken ] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [newStudent, setNewStudent] = useState({
@@ -59,11 +60,25 @@ const Students = () => {
 
   const fetchStudents = async () => {
     try {
-        const response = await axios.get("http://localhost:3000/api/students");
-        setStudents(response.data);
+      const token = sessionStorage.getItem("facultyToken");
+      if (token) {
+        setIsToken(true);
+      } else {
+        setIsToken(false);
+        setLoading(false);
+        return;
+      }
+      const response = await axios.get("http://localhost:3000/api/students", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setStudents(response.data);
     } catch (error) {
         console.error("Error fetching students:", error);
-        setError(true);
+        if (error.response && error.response.status === 401) {
+          setIsToken(false);
+        } else {
+          setError(true);
+        }
     } finally {
         setLoading(false);
     }
@@ -113,13 +128,13 @@ const Students = () => {
       return;
     }
 
-    try {
-      const response = await axios.put(
-        `http://localhost:3000/api/student/${editingStudent.registerNo}`, editingStudent, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-      });
+    try  {
+      const token = sessionStorage.getItem("facultyToken");
+      await axios.put(
+        `http://localhost:3000/api/student/${editingStudent.registerNo}`,
+        editingStudent,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setEditingStudent(null);
       fetchStudents();
     } catch (error) {
@@ -159,11 +174,10 @@ const Students = () => {
       }
 
       try {
+        const token = sessionStorage.getItem("facultyToken");
         const response = await axios.post("http://localhost:3000/api/students", newStudent, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            });
+          headers: { Authorization: `Bearer ${token}` },
+        });
         fetchStudents();
         setOpenDialog(false);
         console.log('Student added:', response.data);
@@ -196,7 +210,10 @@ const Students = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      await axios.delete(`http://localhost:3000/api/student/${studentToDelete.registerNo}`);
+      const token = sessionStorage.getItem("facultyToken");
+      await axios.delete(`http://localhost:3000/api/student/${studentToDelete.registerNo}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setDeleteConfirmOpen(false);
       setStudentToDelete(null);
       fetchStudents();
@@ -215,23 +232,39 @@ const Students = () => {
   );
 
   if (error) 
-  return (
-      <div className="min-h-[70vh] flex flex-col justify-center items-center gap-2">
-      <div className="flex justify-center items-center mb-0">
-          <h4 className="text-gray-500 text-7xl font-bold">
-          500!
-          </h4>
-          <div 
-          className="flex justify-center items-center text-4xl text-red-500 p-4">
+    return (
+        <div className="min-h-[70vh] flex flex-col justify-center items-center gap-2">
+        <div className="flex justify-center items-center mb-0">
+            <h4 className="text-gray-500 text-7xl font-bold">
+              500!
+            </h4>
+            <div 
+              className="flex justify-center items-center text-4xl text-red-500 p-4">
               Server Error
-          </div>
+            </div>
+        </div>
+        <div className="text-gray-600 mt-0">
+            <p>Oops, something went wrong.</p>
+            <p>Try refreshing the page or contact us if the problem persists</p>
+            </div>
+        </div>
+    );
+
+  else if (!isToken) 
+    return (
+      <div className="min-h-[70vh] flex justify-center items-center gap-2">
+        <div className="flex flex-col justify-center items-center mb-0">
+            <h4 className="text-gray-500 text-7xl font-bold">
+              Error 401!
+            </h4>
+            <div 
+            className="flex justify-center items-center text-4xl text-red-500 p-4">
+                You need to be logged in to access this route
+            </div>
+        </div>
       </div>
-      <div className="text-gray-600 mt-0">
-          <p>Oops, something went wrong.</p>
-          <p>Try refreshing the page or contact us if the problem persists</p>
-          </div>
-      </div>
-  );
+    )
+  
 
   return (
     <div className='min-h-[70vh] p-4'>

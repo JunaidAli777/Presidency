@@ -1,6 +1,8 @@
 import express from 'express';
 import Faculty from '../models/Faculty.js';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
 
 const router = express.Router();
 
@@ -22,6 +24,13 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    // Create a JWT token
+    const token = jwt.sign(
+      { faculty: { id: faculty._id, email: faculty.email } }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '1h' }
+    );
     
     // Create a faculty object without the password
     const { password: _, ...facultyData } = faculty.toObject();
@@ -29,6 +38,7 @@ router.post('/login', async (req, res) => {
     // Return faculty data
     res.status(200).json({
       success: true,
+      token,
       data: facultyData
     });
     

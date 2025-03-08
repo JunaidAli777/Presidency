@@ -25,13 +25,8 @@ export default function Example() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    // Remove faculty data from localStorage
-    localStorage.removeItem('facultyData')
-    
-    // Update login state
-    dispatch(logout()) // Update Redux state
-    
-    // Redirect to login page
+    sessionStorage.removeItem('facultyToken');
+    dispatch(logout())
     navigate('/login')
   }
 

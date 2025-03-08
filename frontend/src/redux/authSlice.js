@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const storedUser = localStorage.getItem('facultyData')
+const storedUser = sessionStorage.getItem('facultyToken')
 
 const initialState = {
   isLoggedIn: !!storedUser,

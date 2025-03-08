@@ -70,8 +70,17 @@ const SignupPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+      });      
+
+      const loginResponse = await axios.post('http://localhost:3000/api/auth/login', {
+        email: formData.email,
+        password: formData.password
+      }, {
+        headers: { 'Content-Type': 'application/json' },
       });
-      localStorage.setItem('facultyData', JSON.stringify(response.data));
+
+      // Store the token in sessionStorage
+      sessionStorage.setItem('facultyToken', loginResponse.data.token);      
       console.log('Signup successful:', response.data);
       setFormData({
           firstName: '',
@@ -83,7 +92,7 @@ const SignupPage = () => {
           password: '',
           confirmPassword: '',
         })
-        dispatch(login());
+      dispatch(login());
       navigate('/students')
       alert('Signup successful!');
     } catch (error) {

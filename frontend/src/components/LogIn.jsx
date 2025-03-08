@@ -47,8 +47,8 @@ const LoginPage = () => {
       // Dispatch login action to update Redux state
       dispatch(login());
 
-      // Store user data in localStorage or state management (if needed)
-      localStorage.setItem('facultyData', JSON.stringify(response.data.data));
+      // Store the facultyToken in sessionStorage
+      sessionStorage.setItem('facultyToken', response.data.token);
 
       setFormData({ email: '', password: '' })
       navigate('/students')
