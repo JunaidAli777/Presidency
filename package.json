@@ -1,0 +1,14 @@
+{
+    "name": "presidency",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "concurrently \"npm:start-backend\" \"npm:start-frontend\"",
+        "start-backend": "npm --prefix backend run start",
+        "start-frontend": "npm --prefix frontend run dev"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
