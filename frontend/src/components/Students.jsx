@@ -60,7 +60,10 @@ const Students = () => {
 
   const fetchStudents = async () => {
     try {
-      const token = sessionStorage.getItem("facultyToken");
+      const facultyToken = sessionStorage.getItem("facultyToken");
+      const adminToken = sessionStorage.getItem("adminToken");
+      const token = facultyToken || adminToken;
+
       if (token) {
         setIsToken(true);
       } else {
@@ -129,7 +132,10 @@ const Students = () => {
     }
 
     try  {
-      const token = sessionStorage.getItem("facultyToken");
+      const facultyToken = sessionStorage.getItem("facultyToken");
+      const adminToken = sessionStorage.getItem("adminToken");
+      const token = facultyToken || adminToken;
+
       await axios.put(
         `http://localhost:3000/api/student/${editingStudent.registerNo}`,
         editingStudent,
@@ -174,7 +180,10 @@ const Students = () => {
       }
 
       try {
-        const token = sessionStorage.getItem("facultyToken");
+        const facultyToken = sessionStorage.getItem("facultyToken");
+        const adminToken = sessionStorage.getItem("adminToken");
+        const token = facultyToken || adminToken;
+        
         const response = await axios.post("http://localhost:3000/api/students", newStudent, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -210,7 +219,9 @@ const Students = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      const token = sessionStorage.getItem("facultyToken");
+      const facultyToken = sessionStorage.getItem("facultyToken");
+      const adminToken = sessionStorage.getItem("adminToken");
+      const token = facultyToken || adminToken;
       await axios.delete(`http://localhost:3000/api/student/${studentToDelete.registerNo}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

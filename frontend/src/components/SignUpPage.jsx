@@ -12,22 +12,28 @@ const SignupPage = () => {
     firstName: '',
     middleName: '',
     lastName: '',
+    role: '',
     branch: '',
     designation: '',
     email: '',
     password: '',
     confirmPassword: '',
+    inviteCode: '', // Only for Admins
   });
   
   const [errors, setErrors] = useState({
     firstName: false,
     lastName: false,
+    role: false,
     branch: false,
     designation: false,
     email: false,
     password: false,
     confirmPassword: false,
+    inviteCode: false,
   });
+
+  const [inviteCodeError, setInviteCodeError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,7 +45,21 @@ const SignupPage = () => {
     if (value.trim()) {
       setErrors(prev => ({ ...prev, [name]: false }));
       }
-    };
+
+    // Reset invite code error when user changes the value
+    if (name === 'inviteCode') {
+      setInviteCodeError('');
+    }
+
+    // Reset branch and designation when role changes
+    if (name === 'role') {
+      setFormData((prev) => ({
+        ...prev,
+        branch: '',
+        designation: '',
+      }));
+    }
+  };
 
     const validateEmail = (email) => {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -51,11 +71,13 @@ const SignupPage = () => {
     const newErrors = {
       firstName: !formData.firstName.trim(),
       lastName: !formData.lastName.trim(),
-      branch: !formData.branch,
-      designation: !formData.designation,
+      role: !formData.role,
+      branch: formData.role === 'faculty' && !formData.branch,
+      designation: formData.role === 'faculty' && !formData.designation,
       email: !formData.email.trim() || !validateEmail(formData.email),
       password: !formData.password || formData.password.length < 6,
       confirmPassword: formData.password !== formData.confirmPassword,
+      inviteCode: formData.role === 'admin' && !formData.inviteCode,
     };
     
     setErrors(newErrors);
@@ -66,13 +88,30 @@ const SignupPage = () => {
     const { confirmPassword, ...dataToSubmit } = formData;
     
     try {
-      const response = await axios.post('http://localhost:3000/api/faculties', dataToSubmit, {
+
+      let registerUrl = '';
+      let loginUrl = '';
+      let tokenKey = '';
+  
+      if (formData.role === 'faculty') {
+        registerUrl = 'http://localhost:3000/api/faculties';
+        loginUrl = 'http://localhost:3000/api/auth/login';
+        tokenKey = 'facultyToken';
+      } else if (formData.role === 'admin') {
+        registerUrl = 'http://localhost:3000/api/admins';
+        loginUrl = 'http://localhost:3000/api/authadmin/login';
+        tokenKey = 'adminToken';
+      } else {
+        throw new Error('Invalid role selected');
+      }
+
+      const response = await axios.post(registerUrl, dataToSubmit, {
         headers: {
           'Content-Type': 'application/json',
         },
-      });      
+      });  
 
-      const loginResponse = await axios.post('http://localhost:3000/api/auth/login', {
+      const loginResponse = await axios.post(loginUrl, {
         email: formData.email,
         password: formData.password
       }, {
@@ -80,26 +119,34 @@ const SignupPage = () => {
       });
 
       // Store the token in sessionStorage
-      sessionStorage.setItem('facultyToken', loginResponse.data.token);      
+      sessionStorage.setItem(tokenKey, loginResponse.data.token);
+      sessionStorage.setItem('role', formData.role);    
       console.log('Signup successful:', response.data);
       setFormData({
           firstName: '',
           middleName: '',
           lastName: '',
+          role: '',
           branch: '',
           designation: '',
           email: '',
           password: '',
           confirmPassword: '',
+          inviteCode: '',
         })
       dispatch(login());
-      navigate('/students')
+      navigate(formData.role === 'admin' ? '/faculties' : '/students')
       alert('Signup successful!');
     } catch (error) {
       console.error('Error submitting form:', error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || "Failed to sign up. Please try again.";
+      if (errorMessage === "Invalid invite code.") {
+        setInviteCodeError(errorMessage);
+      } else {
+        alert(errorMessage);
+      }
       alert('Failed to sign up. Please try again.');
     }
-
   };
 
   const branches = [
@@ -169,51 +216,79 @@ const SignupPage = () => {
           />
         </Stack>
 
-        <FormControl 
-          fullWidth 
-          size="small" 
-          error={errors.branch}
-        >
-          <InputLabel id="branch-select-label">Branch *</InputLabel>
-          <Select
-            labelId="branch-select-label"
-            id="branch-select"
-            name="branch"
-            value={formData.branch}
-            label="Branch *"
-            onChange={handleChange}
-          >
-            {branches.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
+        <FormControl fullWidth size="small" error={errors.role}>
+          <InputLabel id="role-select-label">Role *</InputLabel>
+          <Select 
+            labelId="role-select-label"
+            id="role-select"
+            name="role" 
+            value={formData.role} 
+            label="Role *"
+            onChange={handleChange}>
+            <MenuItem value="faculty">Faculty</MenuItem>
+            <MenuItem value="admin">Admin</MenuItem>
           </Select>
-          {errors.branch && <FormHelperText>Please select your branch</FormHelperText>}
+          {errors.role && <FormHelperText>Please select a role</FormHelperText>}
         </FormControl>
-        
-        <FormControl 
-          fullWidth 
-          size="small" 
-          error={errors.designation}
-        >
-          <InputLabel id="designation-select-label">Designation *</InputLabel>
-          <Select
-            labelId="designation-select-label"
-            id="designation-select"
-            name="designation"
-            value={formData.designation}
-            label="Designation *"
-            onChange={handleChange}
+
+        {formData.role === 'faculty' && (<>
+
+          <FormControl fullWidth size="small" error={errors.branch}>
+            <InputLabel id="branch-select-label">Branch *</InputLabel>
+            <Select
+              labelId="branch-select-label"
+              id="branch-select"
+              name="branch"
+              value={formData.branch}
+              label="Branch *"
+              onChange={handleChange}
+            >
+              {branches.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.branch && <FormHelperText>Please select your branch</FormHelperText>}
+          </FormControl>
+          
+          <FormControl 
+            fullWidth 
+            size="small" 
+            error={errors.designation}
           >
-            {designations.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </Select>
-          {errors.designation && <FormHelperText>Please select your designations</FormHelperText>}
-        </FormControl>
+            <InputLabel id="designation-select-label">Designation *</InputLabel>
+            <Select
+              labelId="designation-select-label"
+              id="designation-select"
+              name="designation"
+              value={formData.designation}
+              label="Designation *"
+              onChange={handleChange}
+            >
+              {designations.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.designation && <FormHelperText>Please select your designations</FormHelperText>}
+          </FormControl>
+
+        </>)}
+
+        {formData.role === 'admin' && (
+          <TextField
+            label="Invite Code *"
+            name="inviteCode"
+            fullWidth
+            value={formData.inviteCode}
+            onChange={handleChange}
+            error={errors.inviteCode || !!inviteCodeError}
+            helperText={errors.inviteCode ? "Invite code is required" : inviteCodeError}
+            size="small"
+          />
+        )}
 
         <TextField
           label="Email *"

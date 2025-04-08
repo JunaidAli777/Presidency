@@ -1,5 +1,6 @@
 import express from "express";
 import Student from "../models/Student.js";
+import authMiddleware, { adminOrFacultyMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.get("/:registerNo", async (req, res) => {
 // @route   PUT /api/student/:registerNo
 // @desc    Update a student
 // @access  Public
-router.put("/:registerNo", async (req, res) => {
+router.put("/:registerNo", authMiddleware, adminOrFacultyMiddleware, async (req, res) => {
     try {
       const { registerNo } = req.params;
       const updatedStudent = await Student.findOneAndUpdate(
@@ -47,7 +48,7 @@ router.put("/:registerNo", async (req, res) => {
 // @route   DELETE /api/student/:registerNo
 // @desc    Delete a Student
 // @access  Public
-router.delete("/:registerNo", async (req, res) => {
+router.delete("/:registerNo", authMiddleware, adminOrFacultyMiddleware, async (req, res) => {
     try {
       const deletedStudent = await Student.findOneAndDelete(
         { registerNo: req.params.registerNo } ,

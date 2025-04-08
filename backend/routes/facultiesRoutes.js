@@ -1,12 +1,13 @@
 import express from "express";
 import Faculty from "../models/Faculty.js";
+import authMiddleware, { adminOnlyMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // @route   GET /api/faculties
 // @desc    Get all faculty members
-// @access  Public
-router.get("/", async (req, res) => {
+// @access  Admin Only
+router.get("/", authMiddleware, adminOnlyMiddleware, async (req, res) => {
     try {
       const faculties = await Faculty.find();
       res.status(200).json(faculties);
@@ -19,8 +20,8 @@ router.get("/", async (req, res) => {
   
 // @route   POST /api/faculties
 // @desc    Register a new faculty
-// @access  Public
-router.post("/", async (req, res) => {
+// @access  Admin and Faculty Only
+router.post("/", authMiddleware, adminOnlyMiddleware, async (req, res) => {
   const { firstName, middleName, lastName, branch, designation, email, password } = req.body;
 
   if (!firstName || !lastName || !branch || !designation || !email || !password) {

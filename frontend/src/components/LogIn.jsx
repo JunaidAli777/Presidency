@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Typography, Alert } from '@mui/material';
+import { TextField, 
+         Button, 
+         Box, 
+         Typography, 
+         Alert, 
+         FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../redux/authSlice';
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', role: 'faculty' });
   const [errors, setErrors] = useState({ email: false, password: false });
   const [errorMessage, setErrorMessage] = useState('');
   
@@ -38,7 +43,13 @@ const LoginPage = () => {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', formData, {
+      
+      let tokenKey = formData.role === 'admin' ? 'adminToken' : 'facultyToken'
+      const loginUrl = formData.role === 'admin' 
+      ? 'http://localhost:3000/api/authadmin/login' 
+      : 'http://localhost:3000/api/auth/login';
+
+      const response = await axios.post(loginUrl, formData, {
         headers: { 'Content-Type': 'application/json' },
       });
 
@@ -48,10 +59,11 @@ const LoginPage = () => {
       dispatch(login());
 
       // Store the facultyToken in sessionStorage
-      sessionStorage.setItem('facultyToken', response.data.token);
+      sessionStorage.setItem(tokenKey, response.data.token);
+      sessionStorage.setItem('role', formData.role);
 
-      setFormData({ email: '', password: '' })
-      navigate('/students')
+      setFormData({ email: '', password: '', role: 'faculty' })
+      navigate(formData.role === 'admin' ? '/faculties' : '/students')
       alert('Login successful!');
       
     } catch (error) {
@@ -72,6 +84,21 @@ const LoginPage = () => {
         onSubmit={handleSubmit}
         sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2, maxWidth: 400, width: '100%' }}
       >
+        <FormControl fullWidth size="small">
+          <InputLabel id="role-select-label">Role *</InputLabel>
+          <Select
+            labelId="role-select-label"
+            id="role-select"
+            name="role"
+            label="Role *"
+            value={formData.role}
+            onChange={handleChange}
+          >
+            <MenuItem value="faculty">Faculty</MenuItem>
+            <MenuItem value="admin">Admin</MenuItem>
+          </Select>
+        </FormControl>
+
         <TextField
           label="Email *"
           variant="outlined"

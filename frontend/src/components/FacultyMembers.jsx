@@ -18,7 +18,7 @@ import FormHelperText from "@mui/material/FormHelperText";
 const FacultyMembers = () => {
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
   const [editingFaculty, setEditingFaculty] = useState(null);
   const [formErrors, setFormErrors] = useState({
     firstName: false,
@@ -44,17 +44,28 @@ const FacultyMembers = () => {
 
   const fetchFaculties = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/faculties");
+      const token = sessionStorage.getItem('adminToken');
+      const response = await axios.get("http://localhost:3000/api/faculties", {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });      
       setFaculties(response.data);
     } catch (error) {
       console.error("Error fetching faculty members:", error);
-      setError(true);
+      setError(error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    const role = sessionStorage.getItem("role");
+    if (!role || role !== "admin") {
+      setError("unauthorized");
+      setLoading(false);
+      return;
+    }
     fetchFaculties();
   }, []);
 
@@ -76,7 +87,12 @@ const FacultyMembers = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      await axios.delete(`http://localhost:3000/api/faculty/${facultyToDelete._id}`);
+      const token = sessionStorage.getItem('adminToken');
+      await axios.delete(`http://localhost:3000/api/faculty/${facultyToDelete._id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setDeleteConfirmOpen(false);
       setFacultyToDelete(null);
       fetchFaculties();
@@ -118,9 +134,15 @@ const FacultyMembers = () => {
     }
 
     try {
+      const token = sessionStorage.getItem('adminToken');
       await axios.put(
         `http://localhost:3000/api/faculty/${editingFaculty._id}`,
-        editingFaculty
+        editingFaculty,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
       setEditingFaculty(null);
       fetchFaculties();
@@ -134,7 +156,8 @@ const FacultyMembers = () => {
       <div className="min-h-[70vh] flex justify-center items-center text-4xl p-4">Loading...</div>
     );
 
-  if (error) 
+    
+  if (error && error !== 'unauthorized')
     return (
       <div className="min-h-[70vh] flex flex-col justify-center items-center gap-2">
         <div className="flex justify-center items-center mb-0">
@@ -151,6 +174,14 @@ const FacultyMembers = () => {
             <p>Try refreshing the page or contact us if the problem persists</p>
           </div>
       </div>
+    );
+
+  else if (error === "unauthorized")
+    return (
+      <div className="min-h-[70vh] flex flex-col justify-center items-center gap-2">
+      <h4 className="text-red-500 text-5xl font-bold">401 - Unauthorized</h4>
+      <p className="text-gray-600">You must be logged in as admin to view this page.</p>
+    </div>
     );
 
   return (

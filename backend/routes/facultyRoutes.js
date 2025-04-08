@@ -1,12 +1,13 @@
 import express from "express";
 import Faculty from "../models/Faculty.js";
+import authMiddleware, { adminOnlyMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 // @route   GET /api/faculty/:id
 // @desc    Get a single faculty member by ID
 // @access  Public
-router.get("/:id", async (req, res) => {
+router.get("/:id", authMiddleware, adminOnlyMiddleware, async (req, res) => {
   try {
     const faculty = await Faculty.findById(req.params.id);
     if (!faculty) {
@@ -22,7 +23,7 @@ router.get("/:id", async (req, res) => {
 // @route   PUT /api/faculty/:id
 // @desc    Update a faculty member
 // @access  Public
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, adminOnlyMiddleware, async (req, res) => {
   try {
     const updatedFaculty = await Faculty.findByIdAndUpdate(
       req.params.id,
@@ -44,7 +45,7 @@ router.put("/:id", async (req, res) => {
 // @route   DELETE /api/faculty/:id
 // @desc    Delete a faculty member
 // @access  Public
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, adminOnlyMiddleware, async (req, res) => {
   try {
     const deletedFaculty = await Faculty.findByIdAndDelete(
       req.params.id,

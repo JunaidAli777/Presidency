@@ -20,15 +20,26 @@ import college_icon from '/files/images/college-icon.png'
 
 export default function Example() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn)
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    sessionStorage.removeItem('facultyToken');
-    dispatch(logout())
-    navigate('/login')
+    setLogoutConfirmOpen(true);
   }
+
+  const confirmLogout = () => {
+    sessionStorage.removeItem('role');
+    if (sessionStorage.getItem('facultyToken')) {
+      sessionStorage.removeItem('facultyToken');
+    } else if (sessionStorage.getItem('adminToken')) {
+      sessionStorage.removeItem('adminToken');
+    }
+    dispatch(logout());
+    setLogoutConfirmOpen(false);
+    navigate('/login');
+  };
 
   return (
     <header className="bg-black">
@@ -59,7 +70,7 @@ export default function Example() {
             Home
           </Link>
 
-          <Link to='/facultymembers' className="text-sm/6 font-semibold text-white px-2 py-0.5 rounded-sm hover:bg-gray-500">
+          <Link to='/faculties' className="text-sm/6 font-semibold text-white px-2 py-0.5 rounded-sm hover:bg-gray-500">
             Faculty Members
           </Link>
 
@@ -118,7 +129,7 @@ export default function Example() {
                   Home
                 </Link>
                 
-                <Link to='/facultymembers' className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-black hover:text-white">
+                <Link to='/faculties' className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-black hover:text-white">
                   Faculty Members
                 </Link>
 
@@ -151,6 +162,34 @@ export default function Example() {
           </div>
         </DialogPanel>
       </Dialog>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={logoutConfirmOpen} onClose={() => setLogoutConfirmOpen(false)} className="fixed inset-0 z-10 flex items-center justify-center">
+        {/* Dark overlay with reduced opacity */}
+        <div className="fixed inset-0 bg-black/50"></div>
+
+        {/* Dialog panel */}
+        <DialogPanel className="relative bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+          <h2 className="text-lg font-semibold text-gray-900">Confirm Logout</h2>
+          <p className="mt-2 text-sm text-gray-600">Are you sure you want to log out?</p>
+
+          <div className="mt-4 flex justify-end gap-3">
+            <button
+              onClick={() => setLogoutConfirmOpen(false)}
+              className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-red-700 transition"
+            >
+              Log Out
+            </button>
+          </div>
+        </DialogPanel>
+      </Dialog>
+
     </header>
   )
 }

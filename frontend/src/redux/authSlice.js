@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const storedUser = sessionStorage.getItem('facultyToken')
+const storedFaculty = sessionStorage.getItem('facultyToken')
+const storedAdmin = sessionStorage.getItem('adminToken')
+const storedUser = storedFaculty ? storedFaculty : storedAdmin
 
 const initialState = {
   isLoggedIn: !!storedUser,
