@@ -1,6 +1,6 @@
 import express from 'express';
 import Faculty from '../models/Faculty.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 
