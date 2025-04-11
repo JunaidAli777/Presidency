@@ -15,7 +15,7 @@ const StudentDetails = () => {
 
   const fetchStudent = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/student/${registerNo}`);
+      const response = await axios.get(`/api/student/${registerNo}`);
         if (!response.data || Object.keys(response.data).length === 0) {
           setError({ status: 404, message: 'Student not found' });
         } else {

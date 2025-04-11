@@ -46,8 +46,8 @@ const LoginPage = () => {
       
       let tokenKey = formData.role === 'admin' ? 'adminToken' : 'facultyToken'
       const loginUrl = formData.role === 'admin' 
-      ? 'http://localhost:3000/api/authadmin/login' 
-      : 'http://localhost:3000/api/auth/login';
+      ? '/api/authadmin/login' 
+      : '/api/auth/login';
 
       const response = await axios.post(loginUrl, formData, {
         headers: { 'Content-Type': 'application/json' },

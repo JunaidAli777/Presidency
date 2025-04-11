@@ -45,7 +45,7 @@ const FacultyMembers = () => {
   const fetchFaculties = async () => {
     try {
       const token = sessionStorage.getItem('adminToken');
-      const response = await axios.get("http://localhost:3000/api/faculties", {
+      const response = await axios.get("/api/faculties", {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -88,7 +88,7 @@ const FacultyMembers = () => {
   const handleDeleteConfirm = async () => {
     try {
       const token = sessionStorage.getItem('adminToken');
-      await axios.delete(`http://localhost:3000/api/faculty/${facultyToDelete._id}`, {
+      await axios.delete(`/api/faculty/${facultyToDelete._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -136,7 +136,7 @@ const FacultyMembers = () => {
     try {
       const token = sessionStorage.getItem('adminToken');
       await axios.put(
-        `http://localhost:3000/api/faculty/${editingFaculty._id}`,
+        `/api/faculty/${editingFaculty._id}`,
         editingFaculty,
         {
           headers: {

@@ -94,12 +94,12 @@ const SignupPage = () => {
       let tokenKey = '';
   
       if (formData.role === 'faculty') {
-        registerUrl = 'http://localhost:3000/api/faculties';
-        loginUrl = 'http://localhost:3000/api/auth/login';
+        registerUrl = '/api/faculties';
+        loginUrl = '/api/auth/login';
         tokenKey = 'facultyToken';
       } else if (formData.role === 'admin') {
-        registerUrl = 'http://localhost:3000/api/admins';
-        loginUrl = 'http://localhost:3000/api/authadmin/login';
+        registerUrl = '/api/admins';
+        loginUrl = '/api/authadmin/login';
         tokenKey = 'adminToken';
       } else {
         throw new Error('Invalid role selected');

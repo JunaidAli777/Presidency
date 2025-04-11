@@ -71,7 +71,7 @@ const Students = () => {
         setLoading(false);
         return;
       }
-      const response = await axios.get("http://localhost:3000/api/students", {
+      const response = await axios.get("/api/students", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setStudents(response.data);
@@ -137,7 +137,7 @@ const Students = () => {
       const token = facultyToken || adminToken;
 
       await axios.put(
-        `http://localhost:3000/api/student/${editingStudent.registerNo}`,
+        `/api/student/${editingStudent.registerNo}`,
         editingStudent,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -184,7 +184,7 @@ const Students = () => {
         const adminToken = sessionStorage.getItem("adminToken");
         const token = facultyToken || adminToken;
         
-        const response = await axios.post("http://localhost:3000/api/students", newStudent, {
+        const response = await axios.post("/api/students", newStudent, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchStudents();
@@ -222,7 +222,7 @@ const Students = () => {
       const facultyToken = sessionStorage.getItem("facultyToken");
       const adminToken = sessionStorage.getItem("adminToken");
       const token = facultyToken || adminToken;
-      await axios.delete(`http://localhost:3000/api/student/${studentToDelete.registerNo}`, {
+      await axios.delete(`/api/student/${studentToDelete.registerNo}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDeleteConfirmOpen(false);
