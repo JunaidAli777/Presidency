@@ -25,7 +25,6 @@ const HomePage = () => {
     }
     setError(false);
     navigate(`/student/${registerNo}`);
-
   };
 
   return (

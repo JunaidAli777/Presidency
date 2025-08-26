@@ -176,13 +176,13 @@ export default function Example() {
           <div className="mt-4 flex justify-end gap-3">
             <button
               onClick={() => setLogoutConfirmOpen(false)}
-              className="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition"
+              className="cursor-pointer px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition"
             >
               Cancel
             </button>
             <button
               onClick={confirmLogout}
-              className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-red-700 transition"
+              className="cursor-pointer px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-red-700 transition"
             >
               Log Out
             </button>
